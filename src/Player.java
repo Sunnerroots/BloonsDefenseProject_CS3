@@ -3,6 +3,7 @@ import java.awt.*;
 public class Player {
     private int health = 100;
     private int gold = 500;
+    private int reloadTime;
 
     public void draw(Graphics g) {
         g.setColor(Color.WHITE);
