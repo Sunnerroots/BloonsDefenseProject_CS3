@@ -1,26 +1,23 @@
-import javax.swing.*;
-// Main Game class
-public class Game {
-    public static final int WIDTH = 800;
-    public static final int HEIGHT = 600;
+//(c) A+ Computer Science
+//www.apluscompsci.com
+//Name - Sunrut Mohanty
 
-    private JFrame window;
-    private GamePanel gamePanel;
-
-    public Game() {
-        window = new JFrame("Tower Defense");
-        gamePanel = new GamePanel();
-
-        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setResizable(false);
-        window.add(gamePanel);
-        window.pack();
-        window.setVisible(true);
-
-        gamePanel.startGame();
+//Runs the game
+import javax.swing.JFrame;
+public class Game extends JFrame
+{
+    private static final int WIDTH = 800;
+    private static final int HEIGHT = 600;
+    public Game()
+    {
+        super("Bloons Defense CS3");
+        setSize(WIDTH,HEIGHT);
+        getContentPane().add(new GameBack());
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
-
-    public static void main(String[] args) {
-        new Game();
+    public static void main( String args[] )
+    {
+        Game run = new Game();
     }
 }
