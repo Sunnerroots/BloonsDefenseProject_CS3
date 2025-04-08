@@ -4,7 +4,8 @@ public class Tower {
     private int x, y;
     private int range = 100;
     
-    public Tower(int x, int y) {
+    public Tower(int x, int y)
+    {
         this.x = x;
         this.y = y;
     }

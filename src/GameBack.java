@@ -21,6 +21,7 @@ public class GameBack extends Canvas implements MouseListener
     private final static int WCOUNT = 4;
     private static int width = SCALE * BOARDWIDTH;
     private static int length = SCALE * BOARDLENGTH;
+    private static Player player;
 
 
     //Creates background
@@ -30,6 +31,7 @@ public class GameBack extends Canvas implements MouseListener
         mouseX = mouseY = 0;
         mouseButton = 0;
         prevMouseButton = -1;
+        player = new Player();
 
         addMouseListener(this);
         setBackground(Color.WHITE);
@@ -51,12 +53,17 @@ public class GameBack extends Canvas implements MouseListener
     //First creates board by scaling up initial dimensions and drawing out the matrix
     public void paint(Graphics window)
     {
+        boolean playGame = true;
         //Sets colors and creates initial screen with empty board
         window.setColor(Color.white);
         window.fillRect(0, 0, 640, 480);
+        //Insert the game map
         window.setFont(new Font("TERMINAL", Font.BOLD, 12));
         window.setColor(Color.blue);
         window.drawString("Tower Defense CS3", 550, 55);
+        window.setColor(Color.yellow);
+        window.drawString("Gold: " + player.getGold(), 55, 55);
+
 
     }
 
