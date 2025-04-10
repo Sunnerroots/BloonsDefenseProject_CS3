@@ -7,7 +7,7 @@ import javax.swing.JFrame;
 public class Game extends JFrame
 {
     private static final int WIDTH = 800;
-    private static final int HEIGHT = 600;
+    private static final int HEIGHT = 800;
     public Game()
     {
         super("Bloons Defense CS3");

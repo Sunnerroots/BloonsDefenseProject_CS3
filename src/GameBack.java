@@ -5,6 +5,10 @@ import java.awt.event.MouseListener;
 import java.util.*;
 import java.awt.event.MouseEvent;
 import java.awt.Canvas;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 import tank.Tank1;
 
 
@@ -24,6 +28,7 @@ public class GameBack extends Canvas implements MouseListener
     private static int width = SCALE * BOARDWIDTH;
     private static int length = SCALE * BOARDLENGTH;
     private static Player player;
+    private BufferedImage backgroundImage;
 
 
     //Creates background
@@ -34,6 +39,12 @@ public class GameBack extends Canvas implements MouseListener
         mouseButton = 0;
         prevMouseButton = -1;
         player = new Player();
+
+        try {
+            backgroundImage = ImageIO.read(new File("src/images/bgs/level1.png")); // Update path accordingly
+        } catch (IOException e) {
+            System.err.println("Background image load error: " + e.getMessage());
+        }
 
         addMouseListener(this);
         setBackground(Color.WHITE);
@@ -56,16 +67,41 @@ public class GameBack extends Canvas implements MouseListener
     public void paint(Graphics window)
     {
         boolean playGame = true;
-        //Sets colors and creates initial screen with empty board
-        window.setColor(Color.white);
-        window.fillRect(0, 0, 640, 480);
-        //Insert the game map
-        window.setFont(new Font("TERMINAL", Font.BOLD, 12));
-        window.setColor(Color.blue);
-        window.drawString("Tower Defense CS3", 550, 55);
-        window.setColor(Color.yellow);
-        window.drawString("Gold: " + player.getGold(), 55, 55);
 
+        // ✅ Draw background image if loaded
+        if (backgroundImage != null) {
+            window.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), null);
+        } else {
+            window.setColor(Color.white);
+            window.fillRect(0, 0, 640, 480);
+        }
+
+        Font boldFont = new Font("TERMINAL", Font.BOLD, 16);
+        window.setFont(boldFont);
+
+// Bottom Y position
+        int bottomY = getHeight() - 20;
+
+// Gold text string
+        String goldText = "Gold: " + player.getGold();
+        int goldWidth = window.getFontMetrics().stringWidth(goldText);
+        int goldX = getWidth() - goldWidth - 150;
+
+// Draw gold (bottom-right)
+        window.setColor(Color.BLACK);
+        window.drawString(goldText, goldX + 1, bottomY - 20 + 1); // shadow above title
+        window.setColor(Color.YELLOW);
+        window.drawString(goldText, goldX, bottomY - 20);
+
+// Draw title below gold
+        String title = "Tower Defense CS3";
+        int titleWidth = window.getFontMetrics().stringWidth(title);
+        int titleX = getWidth() - titleWidth - 150;
+
+        window.setColor(Color.BLACK);
+        window.drawString(title, titleX + 1, bottomY + 1); // shadow
+        window.setColor(Color.BLUE);
+        window.drawString(title, titleX, bottomY);
 
     }
 
