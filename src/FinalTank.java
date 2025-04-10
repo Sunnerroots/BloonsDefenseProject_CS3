@@ -1,16 +1,18 @@
 import java.awt.*;
 
-public class Enemy {
+public class FinalTank
+{
     private int x, y;
     private int speed = 2;
     private int width = 40, height = 40;
     
-    public Enemy(int x, int y) {
+    public FinalTank(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
-    public void update() {
+    public void update()
+    {
         x += speed; // Moves enemy to the right
     }
 
