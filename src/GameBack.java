@@ -5,6 +5,8 @@ import java.awt.event.MouseListener;
 import java.util.*;
 import java.awt.event.MouseEvent;
 import java.awt.Canvas;
+import tank.Tank1;
+
 
 //Same as the tic-tac-toe game, however the board is scaled up with more spots, new shapes, and logic to account for empty spots below clicks
 
