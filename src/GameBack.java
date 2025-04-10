@@ -22,6 +22,7 @@ public class GameBack extends Canvas implements MouseListener
     private static int width = SCALE * BOARDWIDTH;
     private static int length = SCALE * BOARDLENGTH;
     private static Player player;
+    private static ArrayList<Tank> bad = new ArrayList<>();
 
 
     //Creates background
@@ -64,13 +65,21 @@ public class GameBack extends Canvas implements MouseListener
         window.setColor(Color.yellow);
         window.drawString("Gold: " + player.getGold(), 55, 55);
 
+        if(mouseClicked)
+        {
+            markBoard();
+        }
+
 
     }
 
-    //Method that actually draws the colored circle
+    //Method that detects the click
     public void markBoard()
     {
-
+        if(player.getLevel() == 1)
+        {
+            bad.add(new Tank(mouseX, mouseY));
+        }
     }
 
     //Figures out who won by checking each possibility

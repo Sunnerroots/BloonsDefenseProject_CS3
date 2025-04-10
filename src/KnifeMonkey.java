@@ -4,6 +4,7 @@ public class KnifeMonkey
     private int dmg;
     private int x, y;
     private int range;
+    private int price;
     public KnifeMonkey(int x, int y)
     {
         reloadTime = 8;
@@ -11,6 +12,7 @@ public class KnifeMonkey
         range = 15;
         this.x = x;
         this.y = y;
+        price = 80;
     }
 
     public int getReloadTime()

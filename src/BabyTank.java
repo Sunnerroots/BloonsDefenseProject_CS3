@@ -43,4 +43,10 @@ public class BabyTank
         g.fillRect(x, y, width, height);
     }
 
+    public void update()
+    {
+        x += speed;
+        y += speed;
+    }
+
 }
