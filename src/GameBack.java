@@ -93,7 +93,7 @@ public class GameBack extends Canvas implements MouseListener
         window.setColor(Color.YELLOW);
         window.drawString(goldText, goldX, bottomY - 20);
 
-// Draw title below gold
+        // Draw title below gold
         String title = "Tower Defense CS3";
         int titleWidth = window.getFontMetrics().stringWidth(title);
         int titleX = getWidth() - titleWidth - 150;

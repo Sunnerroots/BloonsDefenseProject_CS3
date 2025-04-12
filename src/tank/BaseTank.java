@@ -1,9 +1,11 @@
 package tank;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 public class BaseTank {
     protected int x, y;
@@ -63,5 +65,38 @@ public class BaseTank {
 
     public int getX() {
         return x;
+    }
+
+    // --- Static Spawner Methods ---
+
+    public static BaseTank getRandomTank() {
+        Random rand = new Random();
+        int choice = rand.nextInt(3); // 0, 1, or 2
+        switch (choice) {
+            case 0:
+                return new Tank1(0, 300); // adjust y as needed
+            case 1:
+                return new Tank2(0, 300);
+            case 2:
+            default:
+                return new Tank3(0, 300);
+        }
+    }
+
+    public static BaseTank getTankForWave(int waveNumber) {
+        Random rand = new Random();
+        int roll;
+
+        if (waveNumber <= 2) {
+            // Early waves: 70% Tank1, 30% Tank2
+            roll = rand.nextInt(100);
+            if (roll < 70) return new Tank1(0, 300);
+            else return new Tank2(0, 300);
+        } else {
+            // Later waves: 60% Tank2, 40% Tank3
+            roll = rand.nextInt(100);
+            if (roll < 60) return new Tank2(0, 300);
+            else return new Tank3(0, 300);
+        }
     }
 }
