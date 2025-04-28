@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class BaseTank {
@@ -15,6 +16,9 @@ public class BaseTank {
     protected int reloadSpeed;
     protected int width, height;
     protected BufferedImage image;
+    protected int currentWaypoint = 0;
+    protected ArrayList<Point> path;
+
 
     public BaseTank(int x, int y, int health, int speed, int damage, int reloadSpeed, String imagePath) {
         this.x = x;
@@ -39,17 +43,53 @@ public class BaseTank {
     }
 
     public void update() {
-        x += speed;
-    }
+        if (path == null || currentWaypoint >= path.size()) {
+            x += speed; // fallback if no path
+            return;
+        }
 
-    public void draw(Graphics g) {
-        if (image != null) {
-            g.drawImage(image, x, y, null);
+        Point target = path.get(currentWaypoint);
+
+        int dx = target.x - x;
+        int dy = target.y - y;
+        double distance = Math.sqrt(dx*dx + dy*dy);
+
+        if (distance < speed) {
+            // Close enough to move to next waypoint
+            x = target.x;
+            y = target.y;
+            currentWaypoint++;
         } else {
-            g.setColor(Color.RED);
-            g.fillRect(x, y, width, height);
+            // Move towards waypoint
+            x += (int)(speed * dx / distance);
+            y += (int)(speed * dy / distance);
         }
     }
+
+
+    public void draw(Graphics g)
+    {
+        Graphics2D g2d = (Graphics2D) g.create();
+        if (path != null && currentWaypoint < path.size()) {
+            Point target = path.get(currentWaypoint);
+            //Finds angle using the horizontal and vertical displacement
+            double angle = Math.atan2(target.y - y, target.x - x);
+
+
+            //rotates when a small translation is found indicating a turn
+            g2d.translate(x + width/2, y + height/2);
+            g2d.rotate(angle);
+
+            if (image != null) {
+                g2d.drawImage(image, -width/2, -height/2, null);
+            } else {
+                g2d.setColor(Color.RED);
+                g2d.fillRect(-width/2, -height/2, width, height);
+            }
+        }
+        g2d.dispose();
+    }
+
 
     public int getDamage() {
         return damage;
@@ -65,6 +105,15 @@ public class BaseTank {
 
     public int getX() {
         return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public int getCurrentWaypoint()
+    {
+        return currentWaypoint;
     }
 
     // --- Static Spawner Methods ---
@@ -99,4 +148,9 @@ public class BaseTank {
             else return new Tank3(0, 300);
         }
     }
+
+    public void setPath(ArrayList<Point> path) {
+        this.path = path;
+    }
+
 }
