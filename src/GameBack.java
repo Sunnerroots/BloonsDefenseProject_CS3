@@ -33,6 +33,7 @@ public class GameBack extends Canvas implements MouseListener {
     private String levelStartMessage;
     private long levelStartMessageTime;
     private final int LEVEL_MESSAGE_DURATION = 2000; // Show for 2 seconds (2000 ms)
+    private boolean hasWon;
 
 
 
@@ -74,14 +75,16 @@ public class GameBack extends Canvas implements MouseListener {
         currentLevelNumber = 1;
         isGameOver = false;
 
-        pathPoints = new ArrayList<>();
 
-        pathPoints.add(new Point(0, 300));    // start
-        pathPoints.add(new Point(200, 300));
-        pathPoints.add(new Point(200, 500));
-        pathPoints.add(new Point(600, 500));
-        pathPoints.add(new Point(600, 100));
-        pathPoints.add(new Point(800, 100));  // exit at right side
+        //1st Map
+        pathPoints = new ArrayList<>();
+        pathPoints.add(new Point(75, 0));
+        pathPoints.add(new Point(75, 315));
+        pathPoints.add(new Point(300, 315));
+        pathPoints.add(new Point(515, 315));
+        pathPoints.add(new Point(515,115));
+        pathPoints.add(new Point(315, 115));
+        pathPoints.add(new Point(315, 800));
 
     }
 
@@ -103,10 +106,13 @@ public class GameBack extends Canvas implements MouseListener {
         }
 
         // Draw waypoints for testing
+        /*
         window.setColor(Color.MAGENTA);
         for (Point p : pathPoints) {
             window.fillOval(p.x - 5, p.y - 5, 10, 10);
         }
+
+         */
 
 
         // Draw all turrets
@@ -139,6 +145,16 @@ public class GameBack extends Canvas implements MouseListener {
         window.setColor(Color.RED);
         window.drawString(hpText, hpX, getHeight() - 60);
 
+        // Draw Current Wave Number
+        if (!isGameOver) {
+            String waveText = "Wave: " + currentWaveNumber + " / 5";
+            window.setColor(Color.BLACK);
+            window.drawString(waveText, 50 + 1, getHeight() - 150 + 1); // slight shadow
+            window.setColor(Color.WHITE);
+            window.drawString(waveText, 50, getHeight() - 150);
+        }
+
+
         int goldWidth = window.getFontMetrics().stringWidth(goldText);
         int goldX = getWidth() - goldWidth - 150;
         window.setColor(Color.BLACK);
@@ -157,9 +173,15 @@ public class GameBack extends Canvas implements MouseListener {
         if (isGameOver) {
             Font bigFont = new Font("Arial", Font.BOLD, 48);
             window.setFont(bigFont);
-            window.setColor(Color.RED);
-            window.drawString("GAME OVER", getWidth()/2 - 150, getHeight()/2);
+            if (hasWon) {
+                window.setColor(Color.GREEN);
+                window.drawString("YOU WIN!", getWidth()/2 - 150, getHeight()/2);
+            } else {
+                window.setColor(Color.RED);
+                window.drawString("GAME OVER", getWidth()/2 - 150, getHeight()/2);
+            }
         }
+
 
         // Draw Start Wave Button
         if (!isGameOver) {
@@ -252,7 +274,10 @@ public class GameBack extends Canvas implements MouseListener {
             if (currentWave.allTanksSpawned() && currentWave.isComplete(tanks)) {
                 waveInProgress = false;
                 currentWaveNumber++;
+                currentWave = null;
+                player.setGold(100); // Give 100 bonus gold after every wave
             }
+
         }
 
         // Hide level start message after duration
@@ -265,19 +290,32 @@ public class GameBack extends Canvas implements MouseListener {
 
     }
 
-    private BaseTank getTankForCurrentLevel(int level) {
+    private BaseTank getTankForCurrentLevel(int level)
+    {
         Random rand = new Random();
-        if (level == 1) {
-            return new Tank1(0, 300);
-        } else if (level == 2) {
-            if (rand.nextBoolean()) return new Tank1(0, 300);
-            else return new Tank2(0, 300);
-        } else {
-            int roll = rand.nextInt(3);
-            if (roll == 0) return new Tank1(0, 300);
-            else if (roll == 1) return new Tank2(0, 300);
-            else return new Tank3(0, 300);
+        Point start = pathPoints.get(0);
+        if (level == 1)
+        {
+            return new Tank1(start.x, start.y);
         }
+        else if (level == 2)
+        {
+            if (rand.nextBoolean())
+                new Tank1(start.x, start.y);
+            else
+                new Tank2(start.x, start.y);
+        }
+        else
+        {
+            int roll = rand.nextInt(3);
+            if (roll == 0)
+                return new Tank1(start.x, start.y);
+            else if (roll == 1)
+                return new Tank2(start.x, start.y);
+            else
+                return new Tank3(start.x, start.y);
+        }
+        return new Tank3(start.x, start.y);
     }
 
 
@@ -286,13 +324,38 @@ public class GameBack extends Canvas implements MouseListener {
         mouseX = e.getX();
         mouseY = e.getY();
         mouseButton = e.getButton();
-        if (startWaveButtonRect.contains(e.getPoint()) && !waveInProgress) {
-            if (currentWaveNumber > wavesPerLevel) {
+        if (startWaveButtonRect.contains(e.getPoint()) && !waveInProgress)
+        {
+            if (currentWaveNumber > wavesPerLevel)
+            {
                 currentLevelNumber++;
+
+                // Reset and increase gold for new level
+                if (currentLevelNumber == 2) {
+                    player.setGold(1000); // Start Level 2 with 1000 gold
+                }
+                else if (currentLevelNumber == 3) {
+                    player.setGold(1500); // Start Level 3 with 1500 gold
+                }
+
+                if (currentLevelNumber == 2 || currentLevelNumber == 3)
+                {
+                    startWaveButtonRect = new Rectangle(getWidth() - 170, 50, 120, 40); // top right corner
+                }
+
+
+                if (currentLevelNumber > 3)
+                {
+                    isGameOver = true;
+                    hasWon = true;
+                    return; // exit mouseClicked so we don't start a new wave
+                }
+
                 if (currentLevelNumber == 2) {
                     levelStartMessage = "Level 2 Starting!";
                 }
-                else if (currentLevelNumber == 3) {
+                else if (currentLevelNumber == 3)
+                {
                     levelStartMessage = "Final Level!";
                 }
                 showLevelStartMessage = true;
@@ -304,12 +367,16 @@ public class GameBack extends Canvas implements MouseListener {
                 if (currentLevelNumber == 2 || currentLevelNumber == 3) {
                     pathPoints.clear();
                     // new hardlevel path
-                    pathPoints.add(new Point(0, 400));
-                    pathPoints.add(new Point(200, 400));
-                    pathPoints.add(new Point(200, 600));
-                    pathPoints.add(new Point(600, 600));
-                    pathPoints.add(new Point(600, 200));
-                    pathPoints.add(new Point(800, 200));
+                    pathPoints.add(new Point(550, 0));
+                    pathPoints.add(new Point(550, 230));
+                    pathPoints.add(new Point(475,230));
+                    pathPoints.add(new Point(475,150));
+                    pathPoints.add(new Point(165,150));
+                    pathPoints.add(new Point(165,400));
+                    pathPoints.add(new Point(500,400));
+                    pathPoints.add(new Point(500,575));
+                    pathPoints.add(new Point(70,575));
+                    pathPoints.add(new Point(70,800));
                 }
             }
 
