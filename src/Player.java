@@ -5,11 +5,13 @@ public class Player
     private int gold;
     private int reloadTime;
     private int level;
+    private int hp;
 
-    public Player()
-    {
+
+    public Player() {
         gold = 500;
         level = 1;
+        hp = 10; // Start with 10 HP
     }
     public void draw(Graphics g)
     {
@@ -26,6 +28,15 @@ public class Player
     {
         gold += g;
     }
+
+    public int getHP() {
+        return hp;
+    }
+
+    public void loseHP(int amount) {
+        hp -= amount;
+    }
+
 
     public int getLevel()
     {

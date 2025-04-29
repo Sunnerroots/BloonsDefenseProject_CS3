@@ -2,7 +2,8 @@ import tank.BaseTank;
 
 import java.util.List;
 
-public class Wave {
+public class Wave
+{
     public int tankCount;
     public int spawnInterval; // in ms
     public int tanksSpawned = 0;
@@ -22,6 +23,12 @@ public class Wave {
         tanksSpawned++;
         lastSpawnTime = System.currentTimeMillis();
     }
+
+    public boolean allTanksSpawned() {
+        return tanksSpawned >= tankCount;
+    }
+
+
 
     public boolean isComplete(List<BaseTank> tanks) {
         return tanksSpawned >= tankCount && tanks.isEmpty();
