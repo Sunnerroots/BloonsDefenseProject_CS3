@@ -211,19 +211,26 @@ public class GameBack extends Canvas implements MouseListener {
 
     private void gameLogic() {
         // Mouse click to place turret
+        // Check to place turret on the grass
         if (mouseClicked) {
-            if (mouseButton == MouseEvent.BUTTON1 && player.getGold() >= 50) {
-                turrets.add(new Turret1(mouseX, mouseY));
-                player.setGold(-50);
+            boolean isOnGrass = isGrassTile(mouseX, mouseY);
+            boolean isOnStartButton = startWaveButtonRect.contains(mouseX, mouseY);
+
+            if (isOnGrass && !isOnStartButton) {
+                if (mouseButton == MouseEvent.BUTTON1 && player.getGold() >= 50) {
+                    turrets.add(new Turret1(mouseX, mouseY));
+                    player.setGold(-50);
+                } else if (mouseButton == MouseEvent.BUTTON3 && player.getGold() >= 75) {
+                    turrets.add(new Turret2(mouseX, mouseY));
+                    player.setGold(-75);
+                } else if (mouseButton == MouseEvent.BUTTON2 && player.getGold() >= 100) {
+                    turrets.add(new Turret3(mouseX, mouseY));
+                    player.setGold(-100);
+                }
+            } else {
+                System.out.println("Turret placement blocked: either on road or on the Start Wave button.");
             }
-            else if (mouseButton == MouseEvent.BUTTON3 && player.getGold() >= 75) {
-                turrets.add(new Turret2(mouseX, mouseY));
-                player.setGold(-75);
-            }
-            else if (mouseButton == MouseEvent.BUTTON2 && player.getGold() >= 100) {
-                turrets.add(new Turret3(mouseX, mouseY));
-                player.setGold(-100);
-            }
+
             mouseClicked = false;
         }
 
@@ -384,6 +391,24 @@ public class GameBack extends Canvas implements MouseListener {
             waveInProgress = true;
         }
 
+    }
+
+    private boolean isGrassTile(int x, int y) {
+        if (backgroundImage == null) return false;
+
+        // Adjust if your background is scaled (optional)
+        int scaledX = (int)((x / (double)getWidth()) * backgroundImage.getWidth());
+        int scaledY = (int)((y / (double)getHeight()) * backgroundImage.getHeight());
+
+        if (scaledX < 0 || scaledY < 0 || scaledX >= backgroundImage.getWidth() || scaledY >= backgroundImage.getHeight()) {
+            return false;
+        }
+
+        int rgb = backgroundImage.getRGB(scaledX, scaledY);
+        Color color = new Color(rgb);
+
+        // Basic check: greenish grass, not too much red/blue
+        return color.getGreen() > 80 && color.getRed() < 100 && color.getBlue() < 100;
     }
 
 
