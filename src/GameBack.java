@@ -139,6 +139,34 @@ public class GameBack extends Canvas implements MouseListener {
             p.draw(window);
         }
 
+        // === Compact Instructions + Stats Panel ===
+        int infoPanelWidth = 300;
+        int infoPanelHeight = 120;
+        int padding = 8;
+
+        int panelX = getWidth() - infoPanelWidth - 20;
+        int panelY = getHeight() - infoPanelHeight - 90; // above gold/hp/title
+
+        // Draw semi-transparent background
+        window.setColor(new Color(0, 0, 0, 150));
+        window.fillRect(panelX, panelY, infoPanelWidth, infoPanelHeight);
+
+        // Set font and text color
+        window.setFont(new Font("Arial", Font.PLAIN, 12));
+        window.setColor(Color.WHITE);
+
+        int textX = panelX + padding;
+        int textY = panelY + 18;
+
+        window.drawString("LMB: Turret1 ($50)  |  Range 430  Dmg 15  Rld 1.0s", textX, textY);
+        textY += 16;
+        window.drawString("RMB: Turret2 ($75)  |  Range 300  Dmg 25  Rld 0.5s", textX, textY);
+        textY += 16;
+        window.drawString("MMB: Turret3 ($100) |  Range 250  Dmg 35  Rld 0.25s", textX, textY);
+        textY += 20;
+        window.drawString("Place only on grass. No overlap with start button.", textX, textY);
+
+
         // Draw HUD
         Font boldFont = new Font("TERMINAL", Font.BOLD, 16);
         window.setFont(boldFont);
