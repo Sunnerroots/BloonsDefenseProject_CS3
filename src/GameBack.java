@@ -351,7 +351,7 @@ public class GameBack extends Canvas implements MouseListener {
                 waveInProgress = false;
                 currentWaveNumber++;
                 currentWave = null;
-                player.setGold(100); // Give 100 bonus gold after every wave
+                player.setGold(50); // Give 100 bonus gold after every wave
             }
 
         }
@@ -368,33 +368,44 @@ public class GameBack extends Canvas implements MouseListener {
         }
     }
 
-    private BaseTank getTankForCurrentLevel(int level)
-    {
+    private BaseTank getTankForCurrentLevel(int level) {
         Random rand = new Random();
         Point start = pathPoints.get(0);
-        if (level == 1)
-        {
-            return new Tank1(start.x, start.y);
-        }
-        else if (level == 2)
-        {
-            if (rand.nextBoolean())
-                new Tank1(start.x, start.y);
-            else
-                new Tank2(start.x, start.y);
-        }
-        else
-        {
-            int roll = rand.nextInt(3);
-            if (roll == 0)
+
+        // Level 1 Logic
+        if (level == 1) {
+            if (currentWaveNumber <= 2) {
                 return new Tank1(start.x, start.y);
-            else if (roll == 1)
-                return new Tank2(start.x, start.y);
-            else
-                return new Tank3(start.x, start.y);
+            } else if (currentWaveNumber <= 4) {
+                return rand.nextBoolean() ? new Tank1(start.x, start.y) : new Tank2(start.x, start.y);
+            } else {
+                int roll = rand.nextInt(100);
+                return roll < 30 ? new Tank1(start.x, start.y) : new Tank2(start.x, start.y);
+            }
         }
-        return new Tank3(start.x, start.y);
+
+        // Level 2 Logic
+        else if (level == 2) {
+            if (currentWaveNumber <= 2) {
+                return new Tank2(start.x, start.y);
+            } else if (currentWaveNumber <= 4) {
+                return rand.nextBoolean() ? new Tank2(start.x, start.y) : new Tank3(start.x, start.y);
+            } else {
+                int roll = rand.nextInt(100);
+                return roll < 30 ? new Tank2(start.x, start.y) : new Tank3(start.x, start.y);
+            }
+        }
+
+        // Level 3+ Fallback (optional)
+        else {
+            int roll = rand.nextInt(100);
+            if (roll < 30) return new Tank1(start.x, start.y);
+            else if (roll < 60) return new Tank2(start.x, start.y);
+            else return new Tank3(start.x, start.y);
+        }
     }
+
+
 
 
     public void mouseClicked(MouseEvent e) {
@@ -407,7 +418,7 @@ public class GameBack extends Canvas implements MouseListener {
             if (currentWaveNumber > wavesPerLevel)
             {
                 currentLevelNumber++;
-
+                turrets.clear();
                 // Reset and increase gold for new level
                 if (currentLevelNumber == 2) {
                     player.setGold(1000); // Start Level 2 with 1000 gold

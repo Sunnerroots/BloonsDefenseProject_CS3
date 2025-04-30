@@ -78,7 +78,7 @@ public class BaseTank {
 
             //rotates when a small translation is found indicating a turn
             g2d.translate(x + width/2, y + height/2);
-            g2d.rotate(angle);
+            g2d.rotate(angle + Math.PI/2);
 
             if (image != null) {
                 g2d.drawImage(image, -width/2, -height/2, null);

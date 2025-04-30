@@ -9,7 +9,7 @@ public class Player
 
 
     public Player() {
-        gold = 500;
+        gold = 300;
         level = 1;
         hp = 10; // Start with 10 HP
     }
