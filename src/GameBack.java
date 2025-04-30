@@ -34,7 +34,11 @@ public class GameBack extends Canvas implements MouseListener {
     private long levelStartMessageTime;
     private final int LEVEL_MESSAGE_DURATION = 2000; // Show for 2 seconds (2000 ms)
     private boolean hasWon;
-
+    private ArrayList<Projectile> projectiles = new ArrayList<>();
+    private boolean showPlacementError = false;
+    private String placementErrorMessage = "";
+    private long placementErrorStartTime;
+    private final int PLACEMENT_ERROR_DURATION = 5000;
 
 
 
@@ -131,6 +135,10 @@ public class GameBack extends Canvas implements MouseListener {
             window.fillRect(tank.getX(), tank.getY() - 10, hpWidth, 5);
         }
 
+        for (Projectile p : projectiles) {
+            p.draw(window);
+        }
+
         // Draw HUD
         Font boldFont = new Font("TERMINAL", Font.BOLD, 16);
         window.setFont(boldFont);
@@ -200,6 +208,12 @@ public class GameBack extends Canvas implements MouseListener {
             window.drawString(levelStartMessage, (getWidth() - messageWidth) / 2, getHeight() / 2 - 100);
         }
 
+        if (showPlacementError) {
+            window.setColor(Color.BLACK);
+            window.setFont(new Font("Arial", Font.BOLD, 20));
+            int msgWidth = window.getFontMetrics().stringWidth(placementErrorMessage);
+            window.drawString(placementErrorMessage, (getWidth() - msgWidth) / 2, getHeight() - 80);
+        }
     }
 
     private class TimerListener implements ActionListener {
@@ -211,33 +225,67 @@ public class GameBack extends Canvas implements MouseListener {
 
     private void gameLogic() {
         // Mouse click to place turret
+        // Check to place turret on the grass
         if (mouseClicked) {
-            if (mouseButton == MouseEvent.BUTTON1 && player.getGold() >= 50) {
-                turrets.add(new Turret1(mouseX, mouseY));
-                player.setGold(-50);
+            boolean isOnGrass = isGrassTile(mouseX, mouseY);
+            boolean isOnStartButton = startWaveButtonRect.contains(mouseX, mouseY);
+
+            if (isOnGrass && !isOnStartButton) {
+                if (mouseButton == MouseEvent.BUTTON1 && player.getGold() >= 50) {
+                    turrets.add(new Turret1(mouseX, mouseY));
+                    player.setGold(-50);
+                } else if (mouseButton == MouseEvent.BUTTON3 && player.getGold() >= 75) {
+                    turrets.add(new Turret2(mouseX, mouseY));
+                    player.setGold(-75);
+                } else if (mouseButton == MouseEvent.BUTTON2 && player.getGold() >= 100) {
+                    turrets.add(new Turret3(mouseX, mouseY));
+                    player.setGold(-100);
+                }
+            } else {
+                placementErrorMessage = "Can't place turret on road!";
+                showPlacementError = true;
+                placementErrorStartTime = System.currentTimeMillis();
             }
-            else if (mouseButton == MouseEvent.BUTTON3 && player.getGold() >= 75) {
-                turrets.add(new Turret2(mouseX, mouseY));
-                player.setGold(-75);
-            }
-            else if (mouseButton == MouseEvent.BUTTON2 && player.getGold() >= 100) {
-                turrets.add(new Turret3(mouseX, mouseY));
-                player.setGold(-100);
-            }
+
             mouseClicked = false;
         }
 
         // Turrets attack tanks
         for (BaseTurret turret : turrets) {
+            BaseTank closestTank = null;
+            double closestDistance = Double.MAX_VALUE;
+
             for (BaseTank tank : tanks) {
-                double distance = Math.hypot(turret.getX() - tank.getX(), turret.getY() - tank.getY());
-                if (distance <= turret.getRange()) {
-                    tank.takeDamage(turret.getDamage());
-                    break; // Attack one tank at a time
+                double dist = Math.hypot(tank.getX() - turret.getX(), tank.getY() - turret.getY());
+                if (dist <= turret.getRange() && dist < closestDistance) {
+                    closestTank = tank;
+                    closestDistance = dist;
+                }
+            }
+
+            if (closestTank != null) {
+                turret.aimAt(closestTank.getX(), closestTank.getY());
+
+                if (turret.canShoot()) {
+                    projectiles.add(new Projectile(turret.getX(), turret.getY(), closestTank.getX(), closestTank.getY(), turret.getDamage()));
+                    turret.markShotFired();
                 }
             }
         }
 
+        Iterator<Projectile> iter = projectiles.iterator();
+        while (iter.hasNext()) {
+            Projectile p = iter.next();
+            p.update();
+
+            for (BaseTank tank : tanks) {
+                if (p.intersects(tank)) {
+                    tank.takeDamage(p.getDamage());
+                    iter.remove(); // remove projectile on hit
+                    break;
+                }
+            }
+        }
         // Update tanks
         Iterator<BaseTank> tankIterator = tanks.iterator();
         while (tankIterator.hasNext()) {
@@ -287,7 +335,9 @@ public class GameBack extends Canvas implements MouseListener {
             }
         }
 
-
+        if (showPlacementError && System.currentTimeMillis() - placementErrorStartTime > PLACEMENT_ERROR_DURATION) {
+            showPlacementError = false;
+        }
     }
 
     private BaseTank getTankForCurrentLevel(int level)
@@ -384,6 +434,24 @@ public class GameBack extends Canvas implements MouseListener {
             waveInProgress = true;
         }
 
+    }
+
+    private boolean isGrassTile(int x, int y) {
+        if (backgroundImage == null) return false;
+
+        // Adjust if your background is scaled (optional)
+        int scaledX = (int)((x / (double)getWidth()) * backgroundImage.getWidth());
+        int scaledY = (int)((y / (double)getHeight()) * backgroundImage.getHeight());
+
+        if (scaledX < 0 || scaledY < 0 || scaledX >= backgroundImage.getWidth() || scaledY >= backgroundImage.getHeight()) {
+            return false;
+        }
+
+        int rgb = backgroundImage.getRGB(scaledX, scaledY);
+        Color color = new Color(rgb);
+
+        // Basic check: greenish grass, not too much red/blue
+        return color.getGreen() > 80 && color.getRed() < 100 && color.getBlue() < 100;
     }
 
 

@@ -13,6 +13,8 @@ public class BaseTurret {
     protected int damage;
     protected int width, height;
     protected BufferedImage image;
+    protected double angle = 0;
+    protected long lastShotTime = 0;
 
     public BaseTurret(int x, int y, int range, int reloadTime, int damage, String imagepath)
     {
@@ -61,12 +63,27 @@ public class BaseTurret {
 
     public void draw(Graphics g) {
         if (image != null) {
-            g.drawImage(image, x - width/2, y - height/2, null);
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.translate(x, y);
+            g2.rotate(angle);
+            g2.drawImage(image, -width / 2, -height / 2, null);
+            g2.dispose();
         } else {
             g.setColor(Color.BLACK);
             g.fillOval(x - 10, y - 10, 20, 20);
         }
     }
 
+    public void aimAt(int targetX, int targetY) {
+        this.angle = Math.atan2(targetY - y, targetX - x) + Math.PI / 2;
+    }
+
+    public boolean canShoot() {
+        return System.currentTimeMillis() - lastShotTime >= reloadTime;
+    }
+
+    public void markShotFired() {
+        lastShotTime = System.currentTimeMillis();
+    }
 }
 
