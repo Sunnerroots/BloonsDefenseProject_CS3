@@ -1,6 +1,6 @@
 //(c) A+ Computer Science
 //www.apluscompsci.com
-//Name - Sunrut Mohanty
+//Name - Sunrut Mohanty, Deepak Murali, Pranav Panchagnula
 
 //Runs the game
 import javax.swing.JFrame;
