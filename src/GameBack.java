@@ -39,6 +39,8 @@ public class GameBack extends Canvas implements MouseListener {
     private String placementErrorMessage = "";
     private long placementErrorStartTime;
     private final int PLACEMENT_ERROR_DURATION = 5000;
+    private Stack<Landmine> landmines;
+
 
 
 
@@ -53,6 +55,7 @@ public class GameBack extends Canvas implements MouseListener {
         clock = new Timer(20, new TimerListener());
         clock.start();
         waveTimer = 0;
+        landmines = new Stack<>();
 
 
 
@@ -67,6 +70,8 @@ public class GameBack extends Canvas implements MouseListener {
             if(i == 0)
                 lvl.add(new Level(i + 1, "src/images/bgs/level1.png", 500, new ArrayList<>()));
         }
+
+
 
         addMouseListener(this);
         setBackground(Color.WHITE);
@@ -134,6 +139,11 @@ public class GameBack extends Canvas implements MouseListener {
             int hpWidth = Math.max(0, (int) (40 * (tank.getHealth() / 150.0)));
             window.fillRect(tank.getX(), tank.getY() - 10, hpWidth, 5);
         }
+
+        for (Landmine mine : landmines) {
+            mine.draw(window);
+        }
+
 
         for (Projectile p : projectiles) {
             p.draw(window);
@@ -324,8 +334,19 @@ public class GameBack extends Canvas implements MouseListener {
                 player.loseHP(1);
                 tankIterator.remove();
             }
-
         }
+
+        if (!landmines.isEmpty()) {
+            Landmine topMine = landmines.peek(); // LIFO
+            for (BaseTank tank : tanks) {
+                if (!topMine.hasExploded() && topMine.checkCollision(tank)) {
+                    topMine.explode(tank);
+                    landmines.pop(); // remove mine from stack
+                    break; // only one mine per frame
+                }
+            }
+        }
+
 
         if (player.getHP() <= 0) {
             isGameOver = true;
@@ -379,9 +400,9 @@ public class GameBack extends Canvas implements MouseListener {
         else if (level == 2)
         {
             if (rand.nextBoolean())
-                new Tank1(start.x, start.y);
+                return new Tank1(start.x, start.y);
             else
-                new Tank2(start.x, start.y);
+                return new Tank2(start.x, start.y);
         }
         else
         {
@@ -393,7 +414,6 @@ public class GameBack extends Canvas implements MouseListener {
             else
                 return new Tank3(start.x, start.y);
         }
-        return new Tank3(start.x, start.y);
     }
 
 
@@ -402,6 +422,12 @@ public class GameBack extends Canvas implements MouseListener {
         mouseX = e.getX();
         mouseY = e.getY();
         mouseButton = e.getButton();
+        if (e.isShiftDown()) {
+            if (player.getGold() >= Landmine.getCost()) {
+                landmines.push(new Landmine(mouseX, mouseY));
+                player.setGold(-Landmine.getCost());
+            }
+        }
         if (startWaveButtonRect.contains(e.getPoint()) && !waveInProgress)
         {
             if (currentWaveNumber > wavesPerLevel)
