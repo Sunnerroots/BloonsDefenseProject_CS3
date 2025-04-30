@@ -82,13 +82,7 @@ public class GameBack extends Canvas implements MouseListener {
 
         //1st Map
         pathPoints = new ArrayList<>();
-        pathPoints.add(new Point(75, 0));
-        pathPoints.add(new Point(75, 315));
-        pathPoints.add(new Point(300, 315));
-        pathPoints.add(new Point(515, 315));
-        pathPoints.add(new Point(515,115));
-        pathPoints.add(new Point(315, 115));
-        pathPoints.add(new Point(315, 800));
+        updatePathForLevel(1);
 
     }
 
@@ -158,13 +152,10 @@ public class GameBack extends Canvas implements MouseListener {
         int textX = panelX + padding;
         int textY = panelY + 18;
 
-        window.drawString("LMB: Turret1 ($50)  |  Range 430  Dmg 15  Rld 1.0s", textX, textY);
-        textY += 16;
-        window.drawString("RMB: Turret2 ($75)  |  Range 300  Dmg 25  Rld 0.5s", textX, textY);
-        textY += 16;
-        window.drawString("MMB: Turret3 ($100) |  Range 250  Dmg 35  Rld 0.25s", textX, textY);
-        textY += 20;
-        window.drawString("Place only on grass. No overlap with start button.", textX, textY);
+        window.drawString(Turret1.getStats(), textX, textY); textY += 16;
+        window.drawString(Turret2.getStats(), textX, textY); textY += 16;
+        window.drawString(Turret3.getStats(), textX, textY); textY += 20;
+
 
 
         // Draw HUD
@@ -261,13 +252,13 @@ public class GameBack extends Canvas implements MouseListener {
             if (isOnGrass && !isOnStartButton) {
                 if (mouseButton == MouseEvent.BUTTON1 && player.getGold() >= 50) {
                     turrets.add(new Turret1(mouseX, mouseY));
-                    player.setGold(-50);
+                    player.setGold(-75);
                 } else if (mouseButton == MouseEvent.BUTTON3 && player.getGold() >= 75) {
                     turrets.add(new Turret2(mouseX, mouseY));
-                    player.setGold(-75);
+                    player.setGold(-100);
                 } else if (mouseButton == MouseEvent.BUTTON2 && player.getGold() >= 100) {
                     turrets.add(new Turret3(mouseX, mouseY));
-                    player.setGold(-100);
+                    player.setGold(-125);
                 }
             } else {
                 placementErrorMessage = "Can't place turret on road!";
@@ -351,8 +342,31 @@ public class GameBack extends Canvas implements MouseListener {
                 waveInProgress = false;
                 currentWaveNumber++;
                 currentWave = null;
-                player.setGold(50); // Give 100 bonus gold after every wave
+                player.setGold(50); // Bonus gold
+
+                if (currentWaveNumber > wavesPerLevel) {
+                    currentLevelNumber++;
+                    turrets.clear();
+
+                    if (currentLevelNumber == 2) {
+                        player.setGold(1000);
+                        levelStartMessage = "Level 2 Starting!";
+                    } else if (currentLevelNumber == 3) {
+                        player.setGold(1500);
+                        levelStartMessage = "Final Level!";
+                    } else if (currentLevelNumber > 3) {
+                        isGameOver = true;
+                        hasWon = true;
+                        return;
+                    }
+
+                    updatePathForLevel(currentLevelNumber);
+                    showLevelStartMessage = true;
+                    levelStartMessageTime = System.currentTimeMillis();
+                    currentWaveNumber = 1;
+                }
             }
+
 
         }
 
@@ -453,23 +467,16 @@ public class GameBack extends Canvas implements MouseListener {
                 currentWaveNumber = 1;
 
                 // Check for level advancement and update path points
-                if (currentLevelNumber == 2 || currentLevelNumber == 3) {
-                    pathPoints.clear();
-                    // new hardlevel path
-                    pathPoints.add(new Point(550, 0));
-                    pathPoints.add(new Point(550, 230));
-                    pathPoints.add(new Point(475,230));
-                    pathPoints.add(new Point(475,150));
-                    pathPoints.add(new Point(165,150));
-                    pathPoints.add(new Point(165,400));
-                    pathPoints.add(new Point(500,400));
-                    pathPoints.add(new Point(500,575));
-                    pathPoints.add(new Point(70,575));
-                    pathPoints.add(new Point(70,800));
-                }
+                updatePathForLevel(currentLevelNumber);
             }
 
-            currentWave = new Wave(10, 1000); // Start a NEW WAVE
+            int spawnDelay = switch (currentLevelNumber) {
+                case 1 -> 2000;
+                case 2 -> 1500;
+                case 3 -> 1200;
+                default -> 1000;
+            };
+            currentWave = new Wave(10, spawnDelay);
             waveInProgress = true;
         }
 
@@ -491,6 +498,30 @@ public class GameBack extends Canvas implements MouseListener {
 
         // Basic check: greenish grass, not too much red/blue
         return color.getGreen() > 80 && color.getRed() < 100 && color.getBlue() < 100;
+    }
+
+    private void updatePathForLevel(int level) {
+        pathPoints.clear();
+        if (level == 1) {
+            pathPoints.add(new Point(75, 0));
+            pathPoints.add(new Point(75, 315));
+            pathPoints.add(new Point(300, 315));
+            pathPoints.add(new Point(515, 315));
+            pathPoints.add(new Point(515,115));
+            pathPoints.add(new Point(315, 115));
+            pathPoints.add(new Point(315, 800));
+        } else if (level == 2 || level == 3) {
+            pathPoints.add(new Point(550, 0));
+            pathPoints.add(new Point(550, 230));
+            pathPoints.add(new Point(475,230));
+            pathPoints.add(new Point(475,150));
+            pathPoints.add(new Point(165,150));
+            pathPoints.add(new Point(165,400));
+            pathPoints.add(new Point(500,400));
+            pathPoints.add(new Point(500,575));
+            pathPoints.add(new Point(70,575));
+            pathPoints.add(new Point(70,800));
+        }
     }
 
 
